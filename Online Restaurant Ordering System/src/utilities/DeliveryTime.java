@@ -1,4 +1,4 @@
-package utilizations;
+package utilities;
 
 import java.util.List;
 

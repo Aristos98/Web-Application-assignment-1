@@ -1,4 +1,4 @@
-package utilizations;
+package utilities;
 
 public class Time {
     private int minuet;
