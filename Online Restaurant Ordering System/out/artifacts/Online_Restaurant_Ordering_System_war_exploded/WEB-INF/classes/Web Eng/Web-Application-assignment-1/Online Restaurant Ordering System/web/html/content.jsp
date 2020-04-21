@@ -5,7 +5,7 @@
 
 <div class="col-md-4">
     <div class="item-preview mb-5">
-        <a class="item-preview-img box-shadow-lg d-block mb-3" href="https://shop.startbootstrap.com/product/sb-admin-pro/">
+        <a class="item-preview-img box-shadow-lg d-block mb-3" href="add-to-cart3.html">
             <img class="lazy img-fluid" width="400px" alt="<%=meal.getName()%>" src="<%=meal.getUrl()%>" style="">
         </a>
         <div class="item-preview-title d-flex align-items-center">

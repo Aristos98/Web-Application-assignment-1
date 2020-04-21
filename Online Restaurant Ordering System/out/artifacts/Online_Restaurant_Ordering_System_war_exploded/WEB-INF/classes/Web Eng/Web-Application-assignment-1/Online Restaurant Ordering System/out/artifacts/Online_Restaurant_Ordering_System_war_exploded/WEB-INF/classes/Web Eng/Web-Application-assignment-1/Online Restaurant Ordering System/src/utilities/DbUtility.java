@@ -86,7 +86,6 @@ public class DbUtility {
             ResultSet resultSet = stmt.executeQuery("select * from burger");
 
             ArrayList<Meal> ret = new ArrayList<>();
-            resultSet.next();
             while(resultSet.next()){
                 Meal meal = new Meal();
                 meal.setName(resultSet.getString(1));
@@ -98,6 +97,111 @@ public class DbUtility {
             connection.close();
 
             return ret;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    public static ArrayList<Meal> pizzaInfo(){
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from pizza");
+
+            ArrayList<Meal> ret = new ArrayList<>();
+            while(resultSet.next()){
+                Meal meal = new Meal();
+                meal.setName(resultSet.getString(1));
+                meal.setUrlKey(resultSet.getString(2));
+                meal.setPrice(resultSet.getDouble(3));
+                ret.add(meal);
+            }
+
+            connection.close();
+
+            return ret;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    public static ArrayList<Meal> pastaInfo(){
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from pasta");
+
+            ArrayList<Meal> ret = new ArrayList<>();
+            while(resultSet.next()){
+                Meal meal = new Meal();
+                meal.setName(resultSet.getString(1));
+                meal.setUrlKey(resultSet.getString(2));
+                meal.setPrice(resultSet.getDouble(3));
+                ret.add(meal);
+            }
+
+            connection.close();
+
+            return ret;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Meal getMealByName(String mealName){
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from burger where name = '" + mealName + "'");
+
+            Meal meal = null;
+            if(resultSet.next()){
+                meal = new Meal();
+                meal.setName(resultSet.getString(1));
+                meal.setUrlKey(resultSet.getString(2));
+                meal.setPrice(resultSet.getDouble(3));
+                connection.close();
+                return meal;
+            }
+
+            resultSet = stmt.executeQuery("select * from pizza where name = '" + mealName + "'");
+
+            if(resultSet.next()){
+                meal = new Meal();
+                meal.setName(resultSet.getString(1));
+                meal.setUrlKey(resultSet.getString(2));
+                meal.setPrice(resultSet.getDouble(3));
+                connection.close();
+                return meal;
+            }
+
+            resultSet = stmt.executeQuery("select * from pasta where name = '" + mealName + "'");
+
+            if(resultSet.next()){
+                meal = new Meal();
+                meal.setName(resultSet.getString(1));
+                meal.setUrlKey(resultSet.getString(2));
+                meal.setPrice(resultSet.getDouble(3));
+                connection.close();
+                return meal;
+            }
+
+
+            connection.close();
+
+            return meal;
         } catch (SQLException | ClassNotFoundException throwables) {
             throwables.printStackTrace();
             return null;

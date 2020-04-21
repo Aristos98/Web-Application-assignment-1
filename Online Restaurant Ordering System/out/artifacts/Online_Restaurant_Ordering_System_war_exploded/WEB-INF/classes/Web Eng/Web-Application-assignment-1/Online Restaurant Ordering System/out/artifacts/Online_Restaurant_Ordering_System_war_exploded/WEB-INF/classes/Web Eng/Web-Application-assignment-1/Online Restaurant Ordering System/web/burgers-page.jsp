@@ -37,5 +37,7 @@
         %>
 </div>
 </div>
+
+<%@include file="/html/tail.html"%>
 </body>
 </html>

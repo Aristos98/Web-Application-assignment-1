@@ -27,9 +27,10 @@
     <div class="row">
 
         <%
-            ArrayList<Meal> burgers = DbUtility.burgersInfo();
-            for(Meal burger : burgers){
-                request.setAttribute("mealInfo", burger);
+            String mealType = request.getParameter("mealType");
+            ArrayList<Meal> meals = DbUtility.mealsInfo(mealType);
+            for(Meal meal : meals){
+                request.setAttribute("mealInfo", meal);
         %>
         <jsp:include page="html/content.jsp"/>
         <%
