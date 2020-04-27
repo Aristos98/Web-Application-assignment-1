@@ -58,9 +58,9 @@
                         <b><%=request.getSession().getAttribute("username")%></b>
                     </a>
                     <div class="dropdown-menu border-0 shadow animate slideIn" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/bootstrap-resources">Cart</a>
+                        <a class="dropdown-item" href="cart-page.jsp">Cart</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="/sb-angular-inspector">History</a>
+                        <a class="dropdown-item" href="view-history.jsp">History</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="log-out.jsp">Log Out</a>
                     </div>
@@ -75,7 +75,7 @@
         <div class="row align-items-center">
             <div class="col-lg-8 py-5">
                 <h1 class="mb-2">My Online Restaurant &amp; More</h1>
-                <h2 class="m-0">This Website has been made by <br> Hamzeh Abu Sahyoun <br> "Mohammed Rami" Toutenane <br> Abdalrahman Alkraien</h2>
+                <h2 class="m-0">This Website has been made by <br> Hamzeh Abu Sahyoun <br> "Mohammed Rami" Toutenane <br> Abdalrahman Alkraien <br> Mohammad Bashaireh</h2>
             </div>
         </div>
     </div>

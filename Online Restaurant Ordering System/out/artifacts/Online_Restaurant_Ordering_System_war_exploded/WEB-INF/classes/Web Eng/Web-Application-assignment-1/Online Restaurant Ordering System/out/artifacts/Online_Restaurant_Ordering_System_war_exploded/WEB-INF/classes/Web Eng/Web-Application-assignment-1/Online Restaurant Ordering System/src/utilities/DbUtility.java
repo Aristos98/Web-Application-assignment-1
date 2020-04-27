@@ -1,9 +1,13 @@
 package utilities;
 
-import classes.Meal;
+import classes.OrderInterface;
+import classes.*;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DbUtility {
 
@@ -76,68 +80,23 @@ public class DbUtility {
         }
     }
 
-    public static ArrayList<Meal> burgersInfo(){
+    public static ArrayList<Meal> mealsInfo(String mealType){
         try {
+            mealType = mealType.toLowerCase();
             //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
             Class.forName("oracle.jdbc.OracleDriver");
             Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
 
             Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("select * from burger");
+            ResultSet resultSet = null;
 
-            ArrayList<Meal> ret = new ArrayList<>();
-            while(resultSet.next()){
-                Meal meal = new Meal();
-                meal.setName(resultSet.getString(1));
-                meal.setUrlKey(resultSet.getString(2));
-                meal.setPrice(resultSet.getDouble(3));
-                ret.add(meal);
+            if(mealType.endsWith("burger")){
+                resultSet = stmt.executeQuery("select * from burger");
+            }else if(mealType.endsWith("pizza")){
+                resultSet = stmt.executeQuery("select * from pizza");
+            }else{
+                resultSet = stmt.executeQuery("select * from pasta");
             }
-
-            connection.close();
-
-            return ret;
-        } catch (SQLException | ClassNotFoundException throwables) {
-            throwables.printStackTrace();
-            return null;
-        }
-    }
-
-    public static ArrayList<Meal> pizzaInfo(){
-        try {
-            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
-            Class.forName("oracle.jdbc.OracleDriver");
-            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
-
-            Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("select * from pizza");
-
-            ArrayList<Meal> ret = new ArrayList<>();
-            while(resultSet.next()){
-                Meal meal = new Meal();
-                meal.setName(resultSet.getString(1));
-                meal.setUrlKey(resultSet.getString(2));
-                meal.setPrice(resultSet.getDouble(3));
-                ret.add(meal);
-            }
-
-            connection.close();
-
-            return ret;
-        } catch (SQLException | ClassNotFoundException throwables) {
-            throwables.printStackTrace();
-            return null;
-        }
-    }
-
-    public static ArrayList<Meal> pastaInfo(){
-        try {
-            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
-            Class.forName("oracle.jdbc.OracleDriver");
-            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
-
-            Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("select * from pasta");
 
             ArrayList<Meal> ret = new ArrayList<>();
             while(resultSet.next()){
@@ -164,7 +123,15 @@ public class DbUtility {
             Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
 
             Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("select * from burger where name = '" + mealName + "'");
+            ResultSet resultSet = null;
+
+            if(mealName.endsWith("urger")){
+                resultSet = stmt.executeQuery("select * from burger where name = '" + mealName + "'");
+            }else if(mealName.endsWith("izza")){
+                resultSet = stmt.executeQuery("select * from pizza where name = '" + mealName + "'");
+            }else{
+                resultSet = stmt.executeQuery("select * from pasta where name = '" + mealName + "'");
+            }
 
             Meal meal = null;
             if(resultSet.next()){
@@ -172,32 +139,7 @@ public class DbUtility {
                 meal.setName(resultSet.getString(1));
                 meal.setUrlKey(resultSet.getString(2));
                 meal.setPrice(resultSet.getDouble(3));
-                connection.close();
-                return meal;
             }
-
-            resultSet = stmt.executeQuery("select * from pizza where name = '" + mealName + "'");
-
-            if(resultSet.next()){
-                meal = new Meal();
-                meal.setName(resultSet.getString(1));
-                meal.setUrlKey(resultSet.getString(2));
-                meal.setPrice(resultSet.getDouble(3));
-                connection.close();
-                return meal;
-            }
-
-            resultSet = stmt.executeQuery("select * from pasta where name = '" + mealName + "'");
-
-            if(resultSet.next()){
-                meal = new Meal();
-                meal.setName(resultSet.getString(1));
-                meal.setUrlKey(resultSet.getString(2));
-                meal.setPrice(resultSet.getDouble(3));
-                connection.close();
-                return meal;
-            }
-
 
             connection.close();
 
@@ -208,4 +150,276 @@ public class DbUtility {
         }
     }
 
+    public static Cart getCart(String username){
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from user_order where user = '" + username + "' and type = 'cart'");
+
+            if(resultSet == null)
+                return null;
+
+            Cart ret = null;
+            if(resultSet.next()) {
+                ret = new Cart();
+                ret.setOrderId(resultSet.getString(1));
+            }
+
+            connection.close();
+
+            if(ret == null)
+                return ret;
+
+            ret.addOrders(getAllMealOrders(username, ret.getOrderId()));
+
+            return ret;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Cart getOrder(String username, String id){
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from user_order where orderid = '" + id + "'");
+
+            if(resultSet == null)
+                return null;
+
+            Cart ret = null;
+            if(resultSet.next()) {
+                ret = new Cart();
+                ret.setOrderId(resultSet.getString(1));
+                ret.setDate(resultSet.getDate(4));
+            }
+
+            connection.close();
+
+            if(ret == null)
+                return ret;
+
+            ret.addOrders(getAllMealOrders(username, ret.getOrderId()));
+
+            return ret;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    private static List<OrderInterface> getAllMealOrders(String username, String orderId) {
+        List<OrderInterface> orders = new ArrayList<>();
+        orders.addAll(getAllBurgerOrders(username, orderId));
+        orders.addAll(getAllPastaOrders(username, orderId));
+        orders.addAll(getAllPizzaOrders(username, orderId));
+        return orders;
+    }
+
+    private static List<OrderInterface> getAllBurgerOrders(String username, String orderId) {
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from burger_order where user = '" + username + "' and orderid = '" + orderId + "'");
+
+            if(resultSet == null)
+                return null;
+
+            List<OrderInterface> orders = null;
+            while(resultSet.next()){
+                BurgerOrder burgerOrder = new BurgerOrder();
+                burgerOrder.setName(resultSet.getString(1));
+                burgerOrder.setOrderId(resultSet.getString(2));
+                burgerOrder.setMeatWeight(resultSet.getInt(3));
+                burgerOrder.setCheese(resultSet.getInt(4));
+                burgerOrder.setTomato(resultSet.getInt(5));
+                burgerOrder.setLettuce(resultSet.getInt(6));
+                burgerOrder.setTotalPrice(resultSet.getDouble(7));
+                if(orders == null)
+                    orders = new ArrayList<>();
+                orders.add(burgerOrder);
+            }
+
+            connection.close();
+
+            return orders;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    private static List<OrderInterface> getAllPizzaOrders(String username, String orderId) {
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from pizza_order where user = '" + username + "' and orderid = '" + orderId + "'");
+
+            if(resultSet == null)
+                return null;
+
+            List<OrderInterface> orders = null;
+            while(resultSet.next()){
+                PizzaOrder pizzaOrder = new PizzaOrder();
+                pizzaOrder.setName(resultSet.getString(1));
+                pizzaOrder.setOrderId(resultSet.getString(2));
+                pizzaOrder.setOlive(resultSet.getInt(3));
+                pizzaOrder.setOnion(resultSet.getInt(4));
+                pizzaOrder.setCorn(resultSet.getInt(5));
+                pizzaOrder.setTotalPrice(resultSet.getDouble(6));
+                if(orders == null)
+                    orders = new ArrayList<>();
+                orders.add(pizzaOrder);
+            }
+
+            connection.close();
+
+            return orders;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    private static List<OrderInterface> getAllPastaOrders(String username, String orderId) {
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from pasta_order where user = '" + username + "' and orderid = '" + orderId + "'");
+
+            if(resultSet == null)
+                return null;
+
+            List<OrderInterface> orders = null;
+            while(resultSet.next()){
+                PastaOrder pastaOrder = new PastaOrder();
+                pastaOrder.setName(resultSet.getString(1));
+                pastaOrder.setOrderId(resultSet.getString(3));
+                pastaOrder.setMeatType(resultSet.getString(2));
+                pastaOrder.setTotalPrice(resultSet.getDouble(4));
+                if(orders == null)
+                    orders = new ArrayList<>();
+                orders.add(pastaOrder);
+            }
+
+            connection.close();
+
+            return orders;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Cart newCart(String username) {
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("insert into user_order values('" + (username + System.currentTimeMillis()) + "', '" + username + "', 'cart')");
+            connection.close();
+
+
+            Cart ret = getCart(username);
+
+            return ret;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void addOrder(OrderInterface order) {
+        try {
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            if (order.getName().endsWith("urger")) {
+                ResultSet resultSet = stmt.executeQuery("insert into burger_order('name', 'orderId', 'meat_wright', 'cheese', 'tomato', 'lettuce', 'total_price')values('" + order.getName() + "', '" + order.getOrderId() + "',  '" + ((BurgerOrder) order).getMeatWeightInt() + "', '" + ((BurgerOrder) order).getCheeseInt() + "', '" + ((BurgerOrder) order).getTomatoInt() + "', '" + ((BurgerOrder) order).getLettuceInt() + "', '" + ((BurgerOrder) order).getTotalPrice() + "')");
+            } else if (order.getName().endsWith("izza")) {
+                ResultSet resultSet = stmt.executeQuery("insert into user_order('name', 'orderId', 'olive', 'onion', 'corn', 'total_price')values('" + order.getName() + "', '" + order.getOrderId() + "',  '" + ((PizzaOrder) order).getOliveInt() + "', '" + ((PizzaOrder) order).getOnionInt() + "', '" + ((PizzaOrder) order).getCornInt() + "', '" + ((PizzaOrder) order).getTotalPrice() + "')");
+            } else {
+                ResultSet resultSet = stmt.executeQuery("insert into user_order('name', 'orderId', 'meat_type', 'total_price')values('" + order.getName() + "', '" + order.getOrderId() + "',  '" + ((PastaOrder) order).getMeatType() + "', '" + ((PastaOrder) order).getTotalPrice() + "')");
+            }
+
+            connection.close();
+
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+
+        }
+    }
+
+    public static void cleanCart(String username, double totalPrice) {
+        String id = getCart(username).getOrderId();
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss");
+            Date yourDate = (Date) sdf.parse("2008-09-18:22-03-15");
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("insert into history('orderid', 'user', 'totalPrice', 'date') values ('" + id + "', '" +  username + "', '" + totalPrice + "', '" + yourDate + "')");
+            resultSet = stmt.executeQuery("update user_order set type ='purchased' where orderId = '" + id + "'");
+
+            connection.close();
+
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static History getHistory(String username) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss");
+            Date yourDate = (Date) sdf.parse("2008-09-18:22-03-15");
+            //return executeStatment("select * from website_user where username='" + username + "'").getFetchSize() > 0;
+            Class.forName("oracle.jdbc.OracleDriver");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "temp", "temp");
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("select * from history where user = '" + username + "'");
+
+            History history = null;
+            while(resultSet.next()){
+                if(history == null)
+                    history = new History();
+                history.addOrders(getOrder(username, resultSet.getString(1)));
+            }
+
+            connection.close();
+
+            return history;
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+            return null;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

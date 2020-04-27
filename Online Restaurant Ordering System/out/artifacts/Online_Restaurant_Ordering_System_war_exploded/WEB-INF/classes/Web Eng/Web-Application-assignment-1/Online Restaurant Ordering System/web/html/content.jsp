@@ -1,11 +1,12 @@
 <%@ page import="classes.Meal" %>
 <%
     Meal meal = (Meal) request.getAttribute("mealInfo");
+    String mealType = meal.getName().endsWith("urger") ? "Burger" : (meal.getName().endsWith("izza") ? "Pizza" : "Pasta");
 %>
 
-<div class="col-md-4">
+<div class="col-md-4" id="<%=meal.getName()%>">
     <div class="item-preview mb-5">
-        <a class="item-preview-img box-shadow-lg d-block mb-3" href="add-to-cart3.html">
+        <a class="item-preview-img box-shadow-lg d-block mb-3" href="order-page.jsp?type=<%=mealType%>&name=<%=meal.getName()%>">
             <img class="lazy img-fluid" width="400px" alt="<%=meal.getName()%>" src="<%=meal.getUrl()%>" style="">
         </a>
         <div class="item-preview-title d-flex align-items-center">

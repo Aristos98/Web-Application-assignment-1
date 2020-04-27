@@ -39,6 +39,17 @@
 </div>
 </div>
 
+<div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+        <img id="mainImg" class="myImg" src="" />
+        <span class="close">&times;</span>
+        <p id="temp">Some text in the Modal..</p>
+    </div>
+
+</div>
+
 <%@include file="/html/tail.html"%>
 </body>
 </html>
